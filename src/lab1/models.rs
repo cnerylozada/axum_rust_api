@@ -6,19 +6,19 @@ pub struct OriginIp {
 }
 
 #[derive(Debug, Deserialize)]
-struct RawCompany {
-    name: String,
+pub struct RawCompany {
+    pub name: String,
 }
 #[derive(Debug, Deserialize)]
 pub struct RawUser {
-    id: u32,
-    name: String,
-    company: RawCompany,
+    pub id: u32,
+    pub name: String,
+    pub company: RawCompany,
 }
 
 #[derive(Debug, Deserialize)]
-struct User {
-    id: u32,
-    name: String,
-    company: String,
+pub struct User {
+    pub id: u32,
+    pub name: String,
+    pub company: String,
 }
