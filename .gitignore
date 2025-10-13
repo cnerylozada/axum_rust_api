@@ -1,1 +1,17 @@
-/target
+# Rust artifacts
+/target/
+**/*.rs.bk
+**/*.swp
+Cargo.lock
+
+# IDE-specific files
+.idea/
+.vscode/
+
+# Operating System files
+.DS_Store
+Thumbs.db
+
+# Environment variables
+.env
+.env.*
