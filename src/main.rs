@@ -1,11 +1,12 @@
-mod lab1;
-use lab1::{get_origin_ip, get_users};
+mod controllers;
+mod routes;
+use routes::main_router;
 
 #[tokio::main]
 async fn main() {
-    let result = get_origin_ip().await;
-    println!("origin_ip {:?}", result.unwrap());
+    let app = main_router();
 
-    let users = get_users().await;
-    println!("users {:?}", users);
+    // run our app with hyper, listening globally on port 3000
+    let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
+    axum::serve(listener, app).await.unwrap();
 }
