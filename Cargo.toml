@@ -8,5 +8,5 @@ axum = "0.8.6"
 dotenvy = "0.15.7"
 reqwest = { version = "0.12.23", features = ["json"] }
 serde = "1.0.228"
-sqlx = "0.8.6"
+sqlx = { version = "0.8.6", features = ["postgres", "runtime-tokio-rustls"] }
 tokio = { version = "1.47.1", features = ["full"] }
