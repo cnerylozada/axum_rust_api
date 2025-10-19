@@ -1,8 +1,10 @@
 use crate::controllers::users;
 use axum::{Router, routing::get};
+use sqlx::{Pool, Postgres};
 
-pub fn user_routes() -> Router {
+pub fn user_routes(pool: Pool<Postgres>) -> Router {
     Router::new()
-        .route("/users", get(users::get_user_list))
-        .route("/users/{user_id}", get(users::get_user_by_id))
+        .route("/", get(users::get_user_list))
+        .route("/{user_id}", get(users::get_user_by_id))
+        .with_state(pool)
 }
