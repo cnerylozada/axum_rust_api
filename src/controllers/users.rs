@@ -1,6 +1,7 @@
 use axum::{
     Json,
     extract::{Path, State},
+    http::StatusCode,
 };
 use serde::Serialize;
 use sqlx::{PgPool, prelude::FromRow};
@@ -11,13 +12,20 @@ pub struct User {
     age: i64,
 }
 
-pub async fn get_user_list(State(db_pool): State<PgPool>) -> Json<Vec<User>> {
+pub async fn get_user_list(
+    State(db_pool): State<PgPool>,
+) -> Result<Json<Vec<User>>, (StatusCode, String)> {
     let users = sqlx::query_as::<_, User>(r#"SELECT username, age FROM "USERS""#)
         .fetch_all(&db_pool)
-        .await
-        .unwrap();
+        .await;
 
-    Json(users)
+    match users {
+        Ok(result) => Ok(Json(result)),
+        Err(error) => Err((
+            StatusCode::INTERNAL_SERVER_ERROR,
+            format!("Database error: {}", error),
+        )),
+    }
 }
 
 pub async fn get_user_by_id(Path(user_id): Path<String>) -> Json<User> {
