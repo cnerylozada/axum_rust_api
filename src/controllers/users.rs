@@ -47,7 +47,7 @@ pub async fn get_user_by_id(Path(user_id): Path<String>) -> Json<User> {
 
     let user = User {
         username: "cnerylozada".to_string(),
-        age: 32,
+        age: 18,
     };
     Json(user)
 }

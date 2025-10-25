@@ -21,7 +21,7 @@ async fn database_connection() -> Result<Pool<Postgres>, sqlx::Error> {
 
 #[tokio::main]
 async fn main() {
-    dotenvy::dotenv().expect("Unable to access to .env file");
+    let _ = dotenvy::dotenv();
 
     let pool = database_connection().await.unwrap();
 
