@@ -2,52 +2,64 @@ use axum::{
     Json,
     extract::{Path, State},
     http::StatusCode,
-    response::{IntoResponse, Response},
 };
 use serde::Serialize;
-use sqlx::{PgPool, prelude::FromRow};
+use sqlx::{PgPool, prelude::FromRow, types::Uuid};
 
-#[derive(Debug, Serialize, FromRow)]
+use crate::controllers::models::ApiErrorResponse;
+
+#[derive(Serialize, FromRow)]
 pub struct User {
     username: String,
     age: i64,
 }
 
-#[derive(Serialize)]
-pub struct ApiError {
-    pub message: String,
-}
-
-impl IntoResponse for ApiError {
-    fn into_response(self) -> Response {
-        Json(self).into_response()
-    }
-}
-
 pub async fn get_user_list(
     State(db_pool): State<PgPool>,
-) -> Result<Json<Vec<User>>, (StatusCode, ApiError)> {
-    let usere_list_response = sqlx::query_as::<_, User>(r#"SELECT username, age FROM "USERS""#)
-        .fetch_all(&db_pool)
-        .await;
+) -> Result<Json<Vec<User>>, (StatusCode, ApiErrorResponse)> {
+    let query = "SELECT username, age FROM users";
+    let usere_list_response = sqlx::query_as::<_, User>(query).fetch_all(&db_pool).await;
 
     match usere_list_response {
         Ok(user_list) => Ok(Json(user_list)),
         Err(error) => Err((
             StatusCode::INTERNAL_SERVER_ERROR,
-            ApiError {
-                message: format!("Database error: {}", error),
+            ApiErrorResponse {
+                message: error.to_string(),
             },
         )),
     }
 }
 
-pub async fn get_user_by_id(Path(user_id): Path<String>) -> Json<User> {
-    println!("get_user_by_id user_id: {}", user_id);
-
-    let user = User {
-        username: "cnerylozada".to_string(),
-        age: 18,
+pub async fn get_user_by_id(
+    Path(user_id): Path<String>,
+    State(db_pool): State<PgPool>,
+) -> Result<Json<User>, (StatusCode, ApiErrorResponse)> {
+    let id = match Uuid::parse_str(&user_id) {
+        Ok(id) => id,
+        Err(error) => {
+            return Err((
+                StatusCode::BAD_REQUEST,
+                ApiErrorResponse {
+                    message: error.to_string(),
+                },
+            ));
+        }
     };
-    Json(user)
+
+    let query = "SELECT username, age FROM users WHERE id = $1";
+    let user_response = sqlx::query_as::<_, User>(query)
+        .bind(id)
+        .fetch_one(&db_pool)
+        .await;
+
+    match user_response {
+        Ok(user) => Ok(Json(user)),
+        Err(error) => Err((
+            StatusCode::NOT_FOUND,
+            ApiErrorResponse {
+                message: error.to_string(),
+            },
+        )),
+    }
 }
