@@ -2,6 +2,7 @@ use axum::{
     Json,
     extract::{Path, State},
     http::StatusCode,
+    response::{IntoResponse, Response},
 };
 use serde::Serialize;
 use sqlx::{PgPool, prelude::FromRow};
@@ -12,18 +13,31 @@ pub struct User {
     age: i64,
 }
 
+#[derive(Serialize)]
+pub struct ApiError {
+    pub message: String,
+}
+
+impl IntoResponse for ApiError {
+    fn into_response(self) -> Response {
+        Json(self).into_response()
+    }
+}
+
 pub async fn get_user_list(
     State(db_pool): State<PgPool>,
-) -> Result<Json<Vec<User>>, (StatusCode, String)> {
-    let users = sqlx::query_as::<_, User>(r#"SELECT username, age FROM "USERS""#)
+) -> Result<Json<Vec<User>>, (StatusCode, ApiError)> {
+    let usere_list_response = sqlx::query_as::<_, User>(r#"SELECT username, age FROM "USERS""#)
         .fetch_all(&db_pool)
         .await;
 
-    match users {
-        Ok(result) => Ok(Json(result)),
+    match usere_list_response {
+        Ok(user_list) => Ok(Json(user_list)),
         Err(error) => Err((
             StatusCode::INTERNAL_SERVER_ERROR,
-            format!("Database error: {}", error),
+            ApiError {
+                message: format!("Database error: {}", error),
+            },
         )),
     }
 }
