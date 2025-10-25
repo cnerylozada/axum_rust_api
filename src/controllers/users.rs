@@ -1,3 +1,4 @@
+use crate::controllers::models::ApiErrorResponse;
 use axum::{
     Json,
     extract::{Path, State},
@@ -6,10 +7,9 @@ use axum::{
 use serde::Serialize;
 use sqlx::{PgPool, prelude::FromRow, types::Uuid};
 
-use crate::controllers::models::ApiErrorResponse;
-
-#[derive(Serialize, FromRow)]
+#[derive(Debug, Serialize, FromRow)]
 pub struct User {
+    id: uuid::Uuid,
     username: String,
     age: i64,
 }
@@ -17,7 +17,7 @@ pub struct User {
 pub async fn get_user_list(
     State(db_pool): State<PgPool>,
 ) -> Result<Json<Vec<User>>, (StatusCode, ApiErrorResponse)> {
-    let query = "SELECT username, age FROM users";
+    let query = "SELECT id, username, age FROM users";
     let usere_list_response = sqlx::query_as::<_, User>(query).fetch_all(&db_pool).await;
 
     match usere_list_response {
