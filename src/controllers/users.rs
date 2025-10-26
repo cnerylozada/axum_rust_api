@@ -1,18 +1,14 @@
-use crate::controllers::models::ApiErrorResponse;
 use axum::{
     Json,
     extract::{Path, State},
     http::StatusCode,
 };
-use serde::Serialize;
-use sqlx::{PgPool, prelude::FromRow, types::Uuid};
+use sqlx::{PgPool, types::Uuid};
 
-#[derive(Debug, Serialize, FromRow)]
-pub struct User {
-    id: uuid::Uuid,
-    username: String,
-    age: i64,
-}
+use crate::{
+    controllers::models::{CreteUserDto, User},
+    models::ApiErrorResponse,
+};
 
 pub async fn get_user_list(
     State(db_pool): State<PgPool>,
@@ -61,4 +57,17 @@ pub async fn get_user_by_id(
             )
         })?;
     Ok(Json(user_response))
+}
+
+pub async fn create_user(
+    State(db_pool): State<PgPool>,
+    Json(user_dto): Json<CreteUserDto>,
+) -> Result<Json<User>, (StatusCode, ApiErrorResponse)> {
+    println!("user_dto: {:?}", user_dto);
+
+    Ok(Json(User {
+        id: Uuid::parse_str("eff1c0b3-b749-448e-9c9e-2bc291e5a232").unwrap(),
+        username: String::from("lucciano"),
+        age: 5,
+    }))
 }

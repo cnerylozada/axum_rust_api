@@ -1,16 +1,15 @@
-use axum::{
-    Json,
-    response::{IntoResponse, Response},
-};
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
+use sqlx::{prelude::FromRow, types::Uuid};
 
-#[derive(Serialize)]
-pub struct ApiErrorResponse {
-    pub message: String,
+#[derive(Debug, Serialize, FromRow)]
+pub struct User {
+    pub id: Uuid,
+    pub username: String,
+    pub age: i64,
 }
 
-impl IntoResponse for ApiErrorResponse {
-    fn into_response(self) -> Response {
-        Json(self).into_response()
-    }
+#[derive(Debug, Deserialize)]
+pub struct CreteUserDto {
+    pub username: String,
+    pub age: i64,
 }

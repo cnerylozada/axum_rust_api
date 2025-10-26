@@ -4,6 +4,7 @@ use std::env;
 
 mod constants;
 mod controllers;
+mod models;
 mod routes;
 use constants::{DEFAULT_ADDRESS, GLOBAL_PREXIF, SUPABASE_SESSION_POOLER};
 use routes::main_router;

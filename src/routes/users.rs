@@ -4,7 +4,7 @@ use sqlx::{Pool, Postgres};
 
 pub fn user_routes(pool: Pool<Postgres>) -> Router {
     Router::new()
-        .route("/", get(users::get_user_list))
+        .route("/", get(users::get_user_list).post(users::create_user))
         .route("/{user_id}", get(users::get_user_by_id))
         .with_state(pool)
 }
