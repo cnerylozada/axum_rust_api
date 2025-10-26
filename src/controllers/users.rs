@@ -63,11 +63,24 @@ pub async fn create_user(
     State(db_pool): State<PgPool>,
     Json(user_dto): Json<CreteUserDto>,
 ) -> Result<Json<User>, (StatusCode, ApiErrorResponse)> {
-    println!("user_dto: {:?}", user_dto);
+    let query = r#"
+    INSERT INTO users (username, age) VALUES ($1, $2)
+    RETURNING id, username, age
+    "#;
 
-    Ok(Json(User {
-        id: Uuid::parse_str("eff1c0b3-b749-448e-9c9e-2bc291e5a232").unwrap(),
-        username: String::from("lucciano"),
-        age: 5,
-    }))
+    let new_user = sqlx::query_as::<_, User>(query)
+        .bind(user_dto.username)
+        .bind(user_dto.age)
+        .fetch_one(&db_pool)
+        .await
+        .map_err(|error| {
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                ApiErrorResponse {
+                    message: error.to_string(),
+                },
+            )
+        })?;
+
+    Ok(Json(new_user))
 }
