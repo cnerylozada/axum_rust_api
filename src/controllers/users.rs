@@ -17,49 +17,48 @@ pub struct User {
 pub async fn get_user_list(
     State(db_pool): State<PgPool>,
 ) -> Result<Json<Vec<User>>, (StatusCode, ApiErrorResponse)> {
-    let query = "SELECT id, username, age FROM users";
-    let usere_list_response = sqlx::query_as::<_, User>(query).fetch_all(&db_pool).await;
+    let query = "SELECT * FROM users";
 
-    match usere_list_response {
-        Ok(user_list) => Ok(Json(user_list)),
-        Err(error) => Err((
-            StatusCode::INTERNAL_SERVER_ERROR,
-            ApiErrorResponse {
-                message: error.to_string(),
-            },
-        )),
-    }
+    let user_list = sqlx::query_as::<_, User>(query)
+        .fetch_all(&db_pool)
+        .await
+        .map_err(|error| {
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                ApiErrorResponse {
+                    message: error.to_string(),
+                },
+            )
+        })?;
+
+    Ok(Json(user_list))
 }
 
 pub async fn get_user_by_id(
     Path(user_id): Path<String>,
     State(db_pool): State<PgPool>,
 ) -> Result<Json<User>, (StatusCode, ApiErrorResponse)> {
-    let id = match Uuid::parse_str(&user_id) {
-        Ok(id) => id,
-        Err(error) => {
-            return Err((
-                StatusCode::BAD_REQUEST,
-                ApiErrorResponse {
-                    message: error.to_string(),
-                },
-            ));
-        }
-    };
-
-    let query = "SELECT username, age FROM users WHERE id = $1";
-    let user_response = sqlx::query_as::<_, User>(query)
-        .bind(id)
-        .fetch_one(&db_pool)
-        .await;
-
-    match user_response {
-        Ok(user) => Ok(Json(user)),
-        Err(error) => Err((
-            StatusCode::NOT_FOUND,
+    let id = Uuid::parse_str(&user_id).map_err(|error| {
+        (
+            StatusCode::BAD_REQUEST,
             ApiErrorResponse {
                 message: error.to_string(),
             },
-        )),
-    }
+        )
+    })?;
+
+    let query = "SELECT * FROM users WHERE id = $1";
+    let user_response = sqlx::query_as::<_, User>(query)
+        .bind(id)
+        .fetch_one(&db_pool)
+        .await
+        .map_err(|error| {
+            (
+                StatusCode::NOT_FOUND,
+                ApiErrorResponse {
+                    message: error.to_string(),
+                },
+            )
+        })?;
+    Ok(Json(user_response))
 }
