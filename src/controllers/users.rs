@@ -1,3 +1,7 @@
+use crate::{
+    controllers::models::{CreteUserDto, User},
+    models::ApiErrorResponse,
+};
 use axum::{
     Json,
     extract::{Path, State},
@@ -5,11 +9,13 @@ use axum::{
 };
 use sqlx::{PgPool, types::Uuid};
 
-use crate::{
-    controllers::models::{CreteUserDto, User},
-    models::ApiErrorResponse,
-};
-
+#[utoipa::path(
+    get,
+    path = "/api/v1/users",
+    responses(
+        (status = 200, description = "All registered users", body = [User]),
+    ),
+)]
 pub async fn get_user_list(
     State(db_pool): State<PgPool>,
 ) -> Result<Json<Vec<User>>, (StatusCode, ApiErrorResponse)> {

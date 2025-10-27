@@ -4,9 +4,11 @@ use std::env;
 
 mod constants;
 mod controllers;
+mod documentation;
 mod models;
 mod routes;
 use constants::{DEFAULT_ADDRESS, GLOBAL_PREXIF, SUPABASE_SESSION_POOLER};
+use documentation::get_api_documentation;
 use routes::main_router;
 
 async fn database_connection() -> Result<Pool<Postgres>, sqlx::Error> {
@@ -26,7 +28,9 @@ async fn main() {
 
     let pool = database_connection().await.unwrap();
 
-    let app = Router::new().nest(GLOBAL_PREXIF, main_router(pool));
+    let app = Router::new()
+        .nest(GLOBAL_PREXIF, main_router(pool))
+        .merge(get_api_documentation());
 
     let listener = tokio::net::TcpListener::bind(DEFAULT_ADDRESS)
         .await
