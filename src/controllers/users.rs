@@ -10,6 +10,7 @@ use axum::{
 use sqlx::{PgPool, types::Uuid};
 
 #[utoipa::path(
+    tag = "USERS",
     get,
     path = "/api/v1/users",
     responses(
@@ -36,6 +37,14 @@ pub async fn get_user_list(
     Ok(Json(user_list))
 }
 
+#[utoipa::path(
+    tag = "USERS",
+    get,
+    path = "/api/v1/users/{user_id}",
+    responses(
+        (status = 200, description = "All registered users", body = User),
+    ),
+)]
 pub async fn get_user_by_id(
     Path(user_id): Path<String>,
     State(db_pool): State<PgPool>,
