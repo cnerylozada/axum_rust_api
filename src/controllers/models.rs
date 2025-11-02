@@ -19,3 +19,11 @@ pub struct CreteUserDto {
     #[schema(example = 32)]
     pub age: i64,
 }
+
+#[derive(Serialize, ToSchema)]
+pub struct Token {
+    #[schema(example = "550e8400-e29b-41d4-a716-446655440000")]
+    pub id: Uuid,
+    #[schema(example = "mntXmMnUP9vJYxbfykG2ZQhgcFHth6kwg8sVJTBY1pX")]
+    pub mint_address: String,
+}

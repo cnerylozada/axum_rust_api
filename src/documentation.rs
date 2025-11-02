@@ -16,11 +16,15 @@ pub mod api_tags {
             url = "https://linktr.ee/cnerylozada"
         )
     ),
-    tags((name = api_tags::USERS, description = "Users registered by their solana wallet")),
+    tags(
+        (name = api_tags::USERS, description = "Users registered by their solana wallet"),
+        (name = api_tags::TOKENS, description = "Tokens available in the swap app")
+    ),
     paths(
         crate::controllers::users::get_user_list,
         crate::controllers::users::get_user_by_id,
-        crate::controllers::users::create_user
+        crate::controllers::users::create_user,
+        crate::controllers::tokens::get_token_list
     ),
 )]
 struct ApiDoc;
