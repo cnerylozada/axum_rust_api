@@ -1,5 +1,6 @@
 use crate::{
     controllers::models::{CreteUserDto, User},
+    documentation::api_tags,
     models::ApiErrorResponse,
 };
 use axum::{
@@ -10,7 +11,7 @@ use axum::{
 use sqlx::{PgPool, types::Uuid};
 
 #[utoipa::path(
-    tag = "USERS",
+    tag = api_tags::USERS,
     get,
     path = "/api/v1/users",
     responses(
@@ -38,11 +39,14 @@ pub async fn get_user_list(
 }
 
 #[utoipa::path(
-    tag = "USERS",
+    tag = api_tags::USERS,
     get,
     path = "/api/v1/users/{user_id}",
+    params(
+        ("user_id" = String, Path, description = "User database id to get User for")
+    ),
     responses(
-        (status = 200, description = "All registered users", body = User),
+        (status = 200, description = "User found successfully", body = User),
     ),
 )]
 pub async fn get_user_by_id(
@@ -74,6 +78,15 @@ pub async fn get_user_by_id(
     Ok(Json(user_response))
 }
 
+#[utoipa::path(
+    tag = api_tags::USERS,
+    post,
+    path = "/api/v1/users",
+    request_body = CreteUserDto,
+    responses(
+        (status = 200, description = "User created successfully", body = User)
+    )
+)]
 pub async fn create_user(
     State(db_pool): State<PgPool>,
     Json(user_dto): Json<CreteUserDto>,

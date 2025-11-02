@@ -12,8 +12,10 @@ pub struct User {
     age: i64,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, ToSchema)]
 pub struct CreteUserDto {
+    #[schema(example = "devgrim07")]
     pub username: String,
+    #[schema(example = 32)]
     pub age: i64,
 }

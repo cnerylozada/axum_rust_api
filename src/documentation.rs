@@ -2,11 +2,26 @@ use axum::Router;
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
 
+pub mod api_tags {
+    pub const USERS: &str = "USERS";
+    pub const TOKENS: &str = "TOKENS";
+}
+
 #[derive(OpenApi)]
 #[openapi(
-    paths(crate::controllers::users::get_user_list,crate::controllers::users::get_user_by_id),
-    info(title = "axum101", description = "My Api description"),
-    tags((name = "USERS", description = "Some description"))
+    info(
+        title = "axum101", version= "1.0", description = "My Api description",
+        contact(
+            name = "Author: Cristian Nery | FullStack web2/web3",
+            url = "https://linktr.ee/cnerylozada"
+        )
+    ),
+    tags((name = api_tags::USERS, description = "Users registered by their solana wallet")),
+    paths(
+        crate::controllers::users::get_user_list,
+        crate::controllers::users::get_user_by_id,
+        crate::controllers::users::create_user
+    ),
 )]
 struct ApiDoc;
 
