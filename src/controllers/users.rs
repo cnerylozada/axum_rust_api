@@ -1,13 +1,13 @@
 use crate::{
     controllers::models::{CreteUserDto, User},
     documentation::api_tags,
-    middllewares::verify_jwt,
+    middllewares::manage_authentication,
     models::ApiErrorResponse,
 };
 use axum::{
     Json,
     extract::{Path, State},
-    http::StatusCode,
+    http::{HeaderMap, StatusCode},
 };
 use sqlx::{PgPool, types::Uuid};
 
@@ -51,18 +51,18 @@ pub async fn get_user_list(
     ),
 )]
 pub async fn get_user_by_id(
+    headers: HeaderMap,
     Path(user_id): Path<String>,
     State(db_pool): State<PgPool>,
 ) -> Result<Json<User>, (StatusCode, ApiErrorResponse)> {
-    let token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxMjMiLCJyb2xlIjoiYWRtaW4iLCJzdWIiOiIxNzYyMTgwNjU4IiwiaWF0IjoxNzYyMTgwNjc5LCJleHAiOjE3NjIxODQyNzl9.tUM7jJEjcXmN4uZ6pSHcOuDIBo1BxHzSZUEUfO93QIY";
-    println!("token {:?}", token);
-
-    let _ = verify_jwt(token).map_err(|error| {
+    let claims = manage_authentication(headers).map_err(|error| {
         (
             StatusCode::UNAUTHORIZED,
             ApiErrorResponse { message: error },
         )
-    });
+    })?;
+    println!("claims {:?}", claims);
+
     let id = Uuid::parse_str(&user_id).map_err(|error| {
         (
             StatusCode::BAD_REQUEST,
