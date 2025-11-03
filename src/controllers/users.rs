@@ -1,12 +1,12 @@
 use crate::{
-    controllers::models::{CreteUserDto, User},
+    controllers::models::{CreteUserDto, User, UserListQuery},
     documentation::api_tags,
     middllewares::manage_authentication,
     models::ApiErrorResponse,
 };
 use axum::{
     Json,
-    extract::{Path, State},
+    extract::{Path, Query, State},
     http::{HeaderMap, StatusCode},
 };
 use sqlx::{PgPool, types::Uuid};
@@ -20,22 +20,37 @@ use sqlx::{PgPool, types::Uuid};
     ),
 )]
 pub async fn get_user_list(
+    Query(params): Query<UserListQuery>,
     State(db_pool): State<PgPool>,
 ) -> Result<Json<Vec<User>>, (StatusCode, ApiErrorResponse)> {
-    let query = "SELECT * FROM users";
+    let wallet = params.wallet;
 
-    let user_list = sqlx::query_as::<_, User>(query)
-        .fetch_all(&db_pool)
-        .await
-        .map_err(|error| {
-            (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                ApiErrorResponse {
-                    message: error.to_string(),
-                },
-            )
-        })?;
-
+    let user_list = if wallet.is_some() {
+        sqlx::query_as::<_, User>("SELECT * FROM users where wallet = $1")
+            .bind(wallet)
+            .fetch_all(&db_pool)
+            .await
+            .map_err(|error| {
+                (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    ApiErrorResponse {
+                        message: error.to_string(),
+                    },
+                )
+            })?
+    } else {
+        sqlx::query_as::<_, User>("SELECT * FROM users")
+            .fetch_all(&db_pool)
+            .await
+            .map_err(|error| {
+                (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    ApiErrorResponse {
+                        message: error.to_string(),
+                    },
+                )
+            })?
+    };
     Ok(Json(user_list))
 }
 
@@ -55,13 +70,12 @@ pub async fn get_user_by_id(
     Path(user_id): Path<String>,
     State(db_pool): State<PgPool>,
 ) -> Result<Json<User>, (StatusCode, ApiErrorResponse)> {
-    let claims = manage_authentication(headers).map_err(|error| {
+    let _ = manage_authentication(headers).map_err(|error| {
         (
             StatusCode::UNAUTHORIZED,
             ApiErrorResponse { message: error },
         )
     })?;
-    println!("claims {:?}", claims);
 
     let id = Uuid::parse_str(&user_id).map_err(|error| {
         (
@@ -102,13 +116,12 @@ pub async fn create_user(
     Json(user_dto): Json<CreteUserDto>,
 ) -> Result<Json<User>, (StatusCode, ApiErrorResponse)> {
     let query = r#"
-    INSERT INTO users (username, age) VALUES ($1, $2)
-    RETURNING id, username, age
+    INSERT INTO users (wallet) VALUES ($1)
+    RETURNING id, wallet, email
     "#;
 
     let new_user = sqlx::query_as::<_, User>(query)
-        .bind(user_dto.username)
-        .bind(user_dto.age)
+        .bind(user_dto.wallet)
         .fetch_one(&db_pool)
         .await
         .map_err(|error| {
