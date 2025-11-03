@@ -5,6 +5,7 @@ use std::env;
 mod constants;
 mod controllers;
 mod documentation;
+mod middllewares;
 mod models;
 mod routes;
 use constants::{DEFAULT_ADDRESS, GLOBAL_PREXIF, SUPABASE_SESSION_POOLER};

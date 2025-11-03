@@ -13,3 +13,4 @@ sqlx = { version = "0.8.6", features = ["postgres", "runtime-tokio-rustls", "uui
 tokio = { version = "1.47.1", features = ["full"] }
 utoipa = { version = "5.4.0", features = ["uuid"] }
 utoipa-swagger-ui = { version = "9.0.2", features = ["axum"] }
+jsonwebtoken = { version = "10.1.0", features = ["aws_lc_rs"] }
