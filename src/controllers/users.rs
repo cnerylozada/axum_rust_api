@@ -1,7 +1,7 @@
 use crate::{
     controllers::models::{CreteUserDto, User, UserListQuery},
     documentation::api_tags,
-    middllewares::manage_authentication,
+    middlewares::manage_authentication,
     models::ApiErrorResponse,
 };
 use axum::{
