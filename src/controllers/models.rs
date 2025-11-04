@@ -15,6 +15,8 @@ pub struct User {
     wallet: String,
     #[schema(example = "cnerylozada@gmail.com")]
     email: Option<String>,
+    #[schema(example = "USER")]
+    role: String,
 }
 
 #[derive(Debug, Deserialize, ToSchema)]
