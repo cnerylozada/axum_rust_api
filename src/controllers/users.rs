@@ -117,7 +117,7 @@ pub async fn create_user(
 ) -> Result<Json<User>, (StatusCode, ApiErrorResponse)> {
     let query = r#"
     INSERT INTO users (wallet) VALUES ($1)
-    RETURNING id, wallet, email
+    RETURNING id, wallet, email, role
     "#;
 
     let new_user = sqlx::query_as::<_, User>(query)

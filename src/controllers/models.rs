@@ -22,7 +22,7 @@ pub struct User {
 #[derive(Debug, Deserialize, ToSchema)]
 pub struct CreteUserDto {
     #[schema(example = "AKeJdxqP6MpFyhcFGUN79NTUwe2ntZNoGjw37UTbbFp")]
-    pub wallet: i64,
+    pub wallet: String,
 }
 
 #[derive(Serialize, FromRow, ToSchema)]
